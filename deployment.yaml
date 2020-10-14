@@ -1,13 +1,12 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-app-toolchains
-  namespace: demo
+  name: test-app-toolchains # Nombre del despliegue
+  namespace: demo # Proyecto al cuál pertenece
   labels:
-    app: test-app-toolchains
+    app: test-app-toolchains # Nombre de la aplicación
 spec:
-  replicas: 1
+  replicas: 1 # Cantidad de réplicas
   selector:
     matchLabels:
       app: test-app-toolchains
@@ -18,30 +17,31 @@ spec:
     spec:
       containers:
         - name: test-app-toolchains
-          image: us.icr.io/topicos-sprintstage/test-app-toolchains
+          image: us.icr.io/bantotal-demo/prueba-devops-bantotal:0 # Imagen del registro
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 # Puerto que expone
+      imagePullSecrets:
+        - name: all-icr-io # ImagePullSecret (OPCIONAL)
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-app-toolchains
-  namespace: demo
+  name: test-app-toolchains # Nombre del servicio
+  namespace: demo # Proyecto
 spec:
   type: NodePort
   selector:
-    app: test-app-toolchains
+    app: test-app-toolchains # Pairing con el despliegue
   ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30001 #Entre 30000 - 32768
+    - port: 8080 # Puerto que expone
+      targetPort: 8080 # Puerto que se utilizará
 ---
-apiVersion: v1
+apiVersion: route.openshift.io/v1 # Debido a que esto es especial de OpenShift, la apiVersion cambia a esta
 kind: Route
 metadata:
-    name: test-app-toolchains
-    namespace: demo
+    name: test-app-toolchains # Nombre de ruta
+    namespace: demo # Proyecto
 spec:
-    to:
+    to: # Pairing con el servicio recién creado
         kind: Service
         name: test-app-toolchains
